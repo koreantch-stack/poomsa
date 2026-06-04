@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국어 문법 퀴즈</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#ffffff;--bg2:#f7f6f3;--bg3:#f0efe9;--text:#1a1a1a;--text2:#555;--text3:#999;--border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.2);--radius:10px;--radius-lg:14px;--green:#2d7a4f;--green-bg:#edf7f1;--red:#c0392b;--red-bg:#fdf0ef;}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#222;--bg3:#2a2a2a;--text:#f0efe9;--text2:#aaa;--text3:#666;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);--green:#4caf80;--green-bg:#1a2e23;--red:#e57373;--red-bg:#2e1a1a;}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem;}
+.app{max-width:620px;margin:0 auto;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+.header{text-align:center;margin-bottom:2.5rem;}
+.logo{font-size:11px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;margin-bottom:0.75rem;}
+.title{font-size:26px;font-weight:600;color:var(--text);margin-bottom:0.5rem;}
+.subtitle{font-size:14px;color:var(--text2);line-height:1.7;}
+
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:var(--bg2);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.5rem;}
+.info-item{text-align:center;}
+.info-num{font-size:22px;font-weight:600;color:var(--text);}
+.info-label{font-size:12px;color:var(--text3);margin-top:3px;}
+
+.start-btn{width:100%;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);padding:1rem;font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;}
+.start-btn:hover{opacity:0.85;}
+
+.progress-label{font-size:12px;color:var(--text3);text-align:right;margin-bottom:6px;}
+.progress-bar{background:var(--border);border-radius:99px;height:3px;margin-bottom:2rem;overflow:hidden;}
+.progress-fill{height:100%;background:var(--text);border-radius:99px;transition:width 0.4s ease;}
+
+.q-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-bottom:1.25rem;}
+.q-tag{font-size:11px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:0.75rem;}
+.q-text{font-size:17px;color:var(--text);line-height:1.6;}
+.q-sub{font-size:14px;color:var(--text2);margin-top:0.75rem;line-height:1.6;background:var(--bg2);padding:0.75rem 1rem;border-radius:var(--radius);border-left:3px solid var(--border2);}
+
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
+.opt-btn{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;text-align:left;cursor:pointer;font-size:15px;color:var(--text);line-height:1.5;transition:all 0.15s;font-family:inherit;}
+.opt-btn:hover:not(:disabled){border-color:var(--border2);background:var(--bg2);}
+.opt-btn.correct{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red);}
+.opt-btn:disabled{cursor:default;}
+
+.feedback{padding:1rem 1.25rem;border-radius:var(--radius);margin-bottom:1.25rem;font-size:14px;line-height:1.6;display:none;}
+.feedback.correct{background:var(--green-bg);color:var(--green);border:0.5px solid var(--green);}
+.feedback.wrong{background:var(--red-bg);color:var(--red);border:0.5px solid var(--red);}
+.feedback.show{display:block;}
+
+.btn-next{width:100%;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);padding:0.9rem;font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;display:none;}
+.btn-next.show{display:block;}
+
+.result-header{text-align:center;margin-bottom:2rem;}
+.score-big{font-size:56px;font-weight:700;color:var(--text);}
+.score-label{font-size:15px;color:var(--text2);margin-top:4px;}
+.score-comment{font-size:14px;color:var(--text2);margin-top:0.75rem;line-height:1.6;}
+
+.result-list{margin-bottom:2rem;}
+.result-item{display:flex;align-items:flex-start;gap:12px;padding:1rem;border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;background:var(--bg);}
+.result-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
+.result-q{font-size:13px;color:var(--text2);line-height:1.5;}
+.result-q strong{color:var(--text);font-weight:500;}
+.restart-btn{width:100%;background:none;border:0.5px solid var(--border);border-radius:var(--radius);padding:0.85rem;font-size:14px;color:var(--text2);cursor:pointer;font-family:inherit;margin-top:0.75rem;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div id="screen-start" class="screen active">
+    <div class="header">
+      <div class="logo">국어 문법</div>
+      <h1 class="title">국어 기초 문법 퀴즈</h1>
+      <p class="subtitle">품사, 문장 성분, 어문 규정까지<br>핵심 문법만 골라 담았습니다.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-num">15</div><div class="info-label">문항</div></div>
+      <div class="info-item"><div class="info-num">4지선다</div><div class="info-label">형식</div></div>
+      <div class="info-item"><div class="info-num">즉시</div><div class="info-label">해설</div></div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">퀴즈 시작</button>
+  </div>
+
+  <div id="screen-quiz" class="screen">
+    <div class="progress-label" id="prog-label">1 / 15</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="q-card">
+      <div class="q-tag" id="q-tag"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-sub" id="q-sub" style="display:none"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQ()">다음 문제 →</button>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <div class="result-header">
+      <div class="score-big" id="score-big"></div>
+      <div class="score-label">15문제 중 <span id="score-correct"></span>개 정답</div>
+      <div class="score-comment" id="score-comment"></div>
+    </div>
+    <div class="result-list" id="result-list"></div>
+    <button class="start-btn" onclick="restart()">다시 풀기</button>
+    <button class="restart-btn" onclick="restart()">처음으로</button>
+  </div>
+
+</div>
+<script>
+const QUIZ=[
+  {tag:'품사',q:'다음 중 품사의 종류가 나머지와 다른 것은?',sub:null,opts:['매우','빨리','높이','예쁘다'],ans:3,ex:'매우, 빨리, 높이는 모두 부사입니다. 예쁘다는 형용사입니다.'},
+  {tag:'품사',q:'다음 밑줄 친 단어의 품사로 알맞은 것은?',sub:'하늘이 <u>참</u> 맑다.',opts:['명사','부사','형용사','관형사'],ans:1,ex:'참은 형용사 맑다를 꾸며주는 부사입니다.'},
+  {tag:'품사',q:'다음 중 조사가 포함된 문장은?',sub:null,opts:['꽃이 핀다.','꽃 한 송이','예쁜 꽃','꽃을 꺾다'],ans:0,ex:'이, 을은 체언 뒤에 붙는 조사입니다. 꽃이 핀다에서 이가 조사입니다.'},
+  {tag:'문장 성분',q:'다음 문장에서 서술어는?',sub:'민준이가 도서관에서 책을 읽는다.',opts:['민준이가','도서관에서','책을','읽는다'],ans:3,ex:'서술어는 주어의 동작, 상태, 성질을 나타내는 문장 성분입니다. 읽는다가 서술어입니다.'},
+  {tag:'문장 성분',q:'다음 중 목적어가 있는 문장은?',sub:null,opts:['하늘이 파랗다.','새가 날아간다.','나는 밥을 먹었다.','꽃이 활짝 피었다.'],ans:2,ex:'목적어는 타동사의 동작 대상으로 을/를이 붙습니다. 밥을에서 밥이 목적어입니다.'},
+  {tag:'문장 성분',q:'다음 문장에서 관형어는?',sub:'저 <u>새</u> 신발이 예쁘다.',opts:['저','새','신발이','예쁘다'],ans:1,ex:'관형어는 체언을 꾸며주는 문장 성분입니다. 새는 신발을 꾸며주는 관형어입니다.'},
+  {tag:'품사',q:'다음 중 동사와 형용사를 구별하는 기준으로 알맞은 것은?',sub:null,opts:['받침 유무','음절 수','현재형 어미 -ㄴ다/-는다 결합 여부','모음의 종류'],ans:2,ex:'동사는 현재형 어미 -ㄴ다/-는다와 결합할 수 있지만, 형용사는 결합할 수 없습니다. 예) 먹는다(동사) / 예쁜다(X, 형용사)'},
+  {tag:'어문 규정',q:'다음 중 맞춤법이 올바른 것은?',sub:null,opts:['금세','금새','어떻해','않이'],ans:0,ex:'금세가 올바른 표기입니다. 금새는 틀린 표기이며, 어떡해, 아니가 각각 올바른 표기입니다.'},
+  {tag:'어문 규정',q:'다음 중 띄어쓰기가 올바른 것은?',sub:null,opts:['나는학교에간다','책 한권을 읽었다','그것은 내것이다','그는 잘 생겼다'],ans:3,ex:'잘 생겼다는 잘(부사)과 생겼다(동사)를 띄어 씁니다. 나머지는 모두 띄어쓰기 오류가 있습니다.'},
+  {tag:'단어',q:'다음 중 합성어는?',sub:null,opts:['먹이','지우개','눈물','하늘'],ans:2,ex:'눈물은 눈+물이 결합한 합성어입니다. 먹이, 지우개는 파생어이고, 하늘은 단일어입니다.'},
+  {tag:'단어',q:'다음 중 파생어는?',sub:null,opts:['봄비','손발','지우개','돌다리'],ans:2,ex:'파생어는 어근에 접사가 붙어 만들어진 단어입니다. 지우개는 지우(어근)+개(접미사)로 이루어진 파생어입니다.'},
+  {tag:'문장',q:'다음 중 홑문장은?',sub:null,opts:['나는 학교에 가고 친구는 집에 갔다.','봄이 오면 꽃이 핀다.','그는 착하고 성실하다.','강아지가 마당에서 뛰어논다.'],ans:3,ex:'홑문장은 주어와 서술어가 한 번씩만 나오는 문장입니다. 강아지가 마당에서 뛰어논다는 주어(강아지가)+서술어(뛰어논다)로 이루어진 홑문장입니다.'},
+  {tag:'어문 규정',q:'다음 중 표준어가 아닌 것은?',sub:null,opts:['짜장면','허접쓰레기','냄비','설거지'],ans:1,ex:'허접쓰레기는 표준어가 아닙니다. 허섭스레기가 올바른 표준어입니다. 짜장면은 2011년 짜장면과 자장면 모두 표준어로 인정되었습니다.'},
+  {tag:'품사',q:'다음 밑줄 친 단어 중 품사가 다른 하나는?',sub:'① <u>셋</u>이서 밥을 먹었다. ② 사과 <u>세</u> 개를 샀다. ③ <u>세</u>번 말했잖아. ④ 우리 <u>셋</u>은 친구다.',opts:['① 셋','② 세','③ 세','④ 셋'],ans:1,ex:'②의 세는 수관형사(체언을 꾸밈)이고, ①④의 셋은 수사(체언)입니다. ③의 세도 수관형사입니다.'},
+  {tag:'문장 성분',q:'다음 문장의 문장 성분 개수로 알맞은 것은?',sub:'영희가 도서관에서 책을 읽는다.',opts:['2개','3개','4개','5개'],ans:2,ex:'영희가(주어), 도서관에서(부사어), 책을(목적어), 읽는다(서술어)로 총 4개의 문장 성분이 있습니다.'},
+];
+
+let current=0;
+let results=[];
+let answered=false;
+
+function startQuiz(){showScreen('screen-quiz');current=0;results=[];renderQ();}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function renderQ(){
+  answered=false;
+  const q=QUIZ[current];
+  document.getElementById('prog-label').textContent=(current+1)+' / 15';
+  document.getElementById('prog-fill').style.width=((current+1)/15*100)+'%';
+  document.getElementById('q-tag').textContent=q.tag;
+  document.getElementById('q-text').innerHTML=q.q;
+  const sub=document.getElementById('q-sub');
+  if(q.sub){sub.innerHTML=q.sub;sub.style.display='block';}else{sub.style.display='none';}
+  document.getElementById('options').innerHTML=q.opts.map((o,i)=>`<button class="opt-btn" onclick="selectOpt(${i})">${o}</button>`).join('');
+  const fb=document.getElementById('feedback');
+  fb.className='feedback';
+  fb.textContent='';
+  document.getElementById('btn-next').className='btn-next';
+}
+
+function selectOpt(i){
+  if(answered)return;
+  answered=true;
+  const q=QUIZ[current];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  const correct=i===q.ans;
+  btns[i].classList.add(correct?'correct':'wrong');
+  if(!correct)btns[q.ans].classList.add('correct');
+  const fb=document.getElementById('feedback');
+  fb.textContent=(correct?'✓ 정답입니다! ':'✗ 틀렸습니다. ')+q.ex;
+  fb.className='feedback '+(correct?'correct':'wrong')+' show';
+  results.push({q:q.q,correct,myAns:q.opts[i],rightAns:q.opts[q.ans]});
+  document.getElementById('btn-next').className='btn-next show';
+  document.getElementById('btn-next').textContent=current===14?'결과 보기 →':'다음 문제 →';
+}
+
+function nextQ(){
+  if(current===14){showResult();return;}
+  current++;renderQ();
+}
+
+function showResult(){
+  showScreen('screen-result');
+  const correct=results.filter(r=>r.correct).length;
+  const pct=Math.round(correct/15*100);
+  document.getElementById('score-big').textContent=pct+'점';
+  document.getElementById('score-correct').textContent=correct;
+  const comments=['조금 더 공부가 필요해요. 틀린 문제를 다시 확인해보세요.','기초는 잡혔어요. 반복 학습으로 완성도를 높여보세요.','꽤 잘 알고 있네요. 약한 부분만 보완하면 됩니다.','훌륭합니다! 문법 개념이 탄탄하게 잡혀 있어요.','완벽합니다! 국어 문법 마스터네요.'];
+  const idx=pct<40?0:pct<60?1:pct<80?2:pct<100?3:4;
+  document.getElementById('score-comment').textContent=comments[idx];
+  document.getElementById('result-list').innerHTML=results.map((r,i)=>`
+    <div class="result-item">
+      <div class="result-icon">${r.correct?'✓':'✗'}</div>
+      <div class="result-q"><strong>Q${i+1}. ${r.q}</strong><br>${r.correct?'정답: '+r.rightAns:'내 답: '+r.myAns+' / 정답: '+r.rightAns}</div>
+    </div>`).join('');
+}
+
+function restart(){current=0;results=[];showScreen('screen-start');}
+</script>
+</body>
+</html>
